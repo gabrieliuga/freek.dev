@@ -39,7 +39,7 @@ class PaymentsController
             Mail::to('freek@spatie.be')->queue(new PaymentFailed(
                 $request->stripeEmail,
                 $request->amount,
-                $exception->getMessage()
+                $exception->getMessage() . $exception->getTraceAsString()
             ));
 
             return redirect()->action([PaymentsController::class, 'index']);
@@ -57,7 +57,7 @@ class PaymentsController
 
     protected function performPayment(Request $request)
     {
-        Stripe::setApiKey(config('services.stripe.secret'));
+        Stripe::setApiKey(config('settings.stripe.secret'));
 
         $customer = Customer::create([
             'email' => $request->stripeEmail,

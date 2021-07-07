@@ -6,8 +6,7 @@ use Abraham\TwitterOAuth\TwitterOAuth;
 
 class Twitter
 {
-    /** @var \Abraham\TwitterOAuth\TwitterOAuth  */
-    protected $twitter;
+    protected TwitterOAuth $twitter;
 
     public function __construct(TwitterOAuth $twitter)
     {
@@ -20,6 +19,6 @@ class Twitter
             return;
         }
 
-        return $this->twitter->post('statuses/update', compact('status'));
+        return (array)$this->twitter->post('statuses/update', compact('status'));
     }
 }

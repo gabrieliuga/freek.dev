@@ -1,7 +1,7 @@
-@extends('front.layouts.app')
+<x-app-layout>
+    <x-ad />
 
-@section('content')
     @include('front.posts.partials.list')
 
     {{ $posts->links() }}
-@endsection
+</x-app-layout>

@@ -1,8 +1,10 @@
+import 'alpinejs';
+
 Array.from(document.querySelectorAll('[data-lazy]')).forEach(lazy);
 
 function lazy(element) {
     function observerCallback(entries, observer) {
-        entries.forEach(entry => {
+        entries.forEach((entry) => {
             if (!entry.isIntersecting) {
                 return;
             }
@@ -36,10 +38,4 @@ function loadTwitter() {
     script.src = 'https://platform.twitter.com/widgets.js';
 
     document.body.appendChild(script);
-}
-
-const searchApp = document.querySelector('#search-app');
-
-if (searchApp) {
-    import('./search').then(search => search.mount(searchApp));
 }

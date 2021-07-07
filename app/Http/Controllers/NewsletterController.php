@@ -2,20 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use Spatie\Mailcoach\Domain\Campaign\Models\Campaign;
+
 class NewsletterController
 {
-    public function index()
+    public function __invoke()
     {
-        return view('front.newsletter.index');
-    }
+        $pastCampaigns = Campaign::sent()->orderByDesc('sent_at')->limit(100)->get();
 
-    public function confirm()
-    {
-        return view('front.newsletter.confirm');
-    }
-
-    public function subscribed()
-    {
-        return view('front.newsletter.subscribed');
+        return view('front.newsletter.index', compact('pastCampaigns'));
     }
 }

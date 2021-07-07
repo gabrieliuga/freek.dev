@@ -1,10 +1,8 @@
-# The source code of https://freek.dev
+[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/freekdev.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/freek.dev)
 
-[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
+We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
 
-This repo contains the source code of my Laravel powered blog at [https://freek.dev](https://freek.dev). I've written a blogpost on some of its internal details [here](https://murze.be/on-migrating-my-blog-from-wordpress-to-a-laravel-application).
-
-You are free to fork this code and use it for your own blog. Just keep in mind that this code is tailormade for me and it does not aim to be a generic blog solution.
+We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
 
 ## Contributing
 
@@ -18,7 +16,7 @@ If you discover any security related issues, please email freek@spatie.be instea
 
 You're free to use this code (it's [MIT-licensed](LICENSE.md)). If you use it to set up your own blog we would highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using.
 
-Our address is: Spatie, Samberstraat 69D, 2060 Antwerp, Belgium.
+Our address is: Spatie, Kruikstraat 22, 2018 Antwerp, Belgium.
 
 All postcards are published [on our website](https://spatie.be/en/opensource/postcards).
 
@@ -26,13 +24,6 @@ All postcards are published [on our website](https://spatie.be/en/opensource/pos
 
 - [Freek Van der Herten](https://github.com/freekmurze)
 - [All Contributors](../../contributors)
-
-## Support us
-
-Spatie is a webdesign agency based in Antwerp, Belgium. You'll find an overview of all our open source projects [on our website](https://spatie.be/opensource).
-
-Does your business depend on our contributions? Reach out and support us on [Patreon](https://www.patreon.com/spatie).
-All pledges will be dedicated to allocating workforce on maintenance and new awesome stuff.
 
 ## License
 

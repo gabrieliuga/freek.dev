@@ -1,18 +1,9 @@
-@extends('front.layouts.app', [
-    'title' => $post->title,
-])
+<x-app-layout :title="$post->title">
+    <x-ad/>
 
-@section('content')
-    @if($ad)
-        <div class="markup | text-xs text-gray-700 mb-6 bg-yellow-100 p-2">
-            {!! $ad->formatted_text !!}
-        </div>
-    @endif
+    <x-post-header :post="$post" class="mb-8">
 
-    @component('front.posts.partials.post', [
-        'post' => $post,
-        'class' => 'mb-8',
-    ])
+
         {!! $post->formatted_text !!}
 
         @unless($post->isTweet())
@@ -24,31 +15,32 @@
                 </p>
             @endif
         @endunless
-    @endcomponent
+    </x-post-header>
 
     @include('front.newsletter.partials.block', [
         'class' => 'mb-8',
     ])
 
-    @component('front.components.lazy')
-        @include('front.posts.partials.disqus')
-    @endcomponent
-@endsection
+    <div class="mb-8">
+        @include('front.posts.partials.comments')
+    </div>
 
-@section('seo')
-    <meta property="og:title" content="{{ $post->title }} | freek.dev"/>
-    <meta property="og:description" content="{{ $post->excerpt }}"/>
+    <x-slot name="seo">
+        <meta property="og:title" content="{{ $post->title }} | freek.dev"/>
+        <meta property="og:description" content="{{ $post->plain_text_excerpt }}"/>
+        <meta name="og:image" content="{{ url($post->getFirstMediaUrl('ogImage')) }}"/>
 
-    @foreach($post->tags as $tag)
-        <meta property="article:tag" content="{{ $tag->name }}"/>
-    @endforeach
-    <meta property="article:published_time" content="{{ optional($post->publish_date)->toIso8601String() }}"/>
-    <meta property="og:updated_time" content="{{ $post->updated_at->toIso8601String() }}"/>
+        @foreach($post->tags as $tag)
+            <meta property="article:tag" content="{{ $tag->name }}"/>
+        @endforeach
 
-    <meta name="twitter:card" content="summary_large_image"/>
-    <meta name="twitter:description" content="{{ $post->excerpt }}"/>
-    <meta name="twitter:title" content="{{ $post->title }} | freek.dev"/>
-    <meta name="twitter:site" content="@freekmurze"/>
-    <meta name="twitter:image" content="https://freek.dev/images/avatar-boxed.jpg"/>
-    <meta name="twitter:creator" content="@freekmurze"/>
-@endsection
+        <meta property="article:published_time" content="{{ optional($post->publish_date)->toIso8601String() }}"/>
+        <meta property="og:updated_time" content="{{ $post->updated_at->toIso8601String() }}"/>
+        <meta name="twitter:card" content="summary_large_image"/>
+        <meta name="twitter:description" content="{{ $post->plain_text_excerpt }}"/>
+        <meta name="twitter:title" content="{{ $post->title }} | freek.dev"/>
+        <meta name="twitter:site" content="@freekmurze"/>
+        <meta name="twitter:image" content="{{ url($post->getFirstMediaUrl('ogImage')) }}"/>
+        <meta name="twitter:creator" content="@freekmurze"/>
+    </x-slot>
+</x-app-layout>

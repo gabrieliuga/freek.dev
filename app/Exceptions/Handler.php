@@ -2,7 +2,6 @@
 
 namespace App\Exceptions;
 
-use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Validation\ValidationException;
 
@@ -17,17 +16,10 @@ class Handler extends ExceptionHandler
         'password_confirmation',
     ];
 
-    public function report(Exception $exception)
+    public function register()
     {
-        parent::report($exception);
-    }
-
-    public function render($request, Exception $exception)
-    {
-        if ($exception instanceof ValidationException) {
+        $this->reportable(function (ValidationException $exception) {
             flash()->error('Please correct the errors in the form');
-        }
-
-        return parent::render($request, $exception);
+        });
     }
 }

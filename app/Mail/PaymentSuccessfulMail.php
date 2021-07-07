@@ -10,23 +10,16 @@ class PaymentSuccessfulMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    /** @var string */
-    public $email;
-
-    /** @var int */
-    public $amount;
-
-    public function __construct(string $email, int $amount)
-    {
-        $this->email = $email;
-
-        $this->amount = $amount;
+    public function __construct(
+        public string $email,
+        public int $amount
+    ) {
     }
 
     public function build()
     {
         return $this
             ->subject('Payment made on freek.dev')
-            ->view('mail.paymentSuccessFul');
+            ->view('mails.payments.paymentSuccessFul');
     }
 }

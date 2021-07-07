@@ -1,4 +1,5 @@
 @setup
+$branch = 'master';
 $server = "freek.dev";
 $userAndServer = 'forge@'. $server;
 $repository = "spatie/freek.dev";
@@ -38,8 +39,8 @@ deployOnlyCode
 
 @task('startDeployment', ['on' => 'local'])
 {{ logMessage("🏃  Starting deployment…") }}
-git checkout master
-git pull origin master
+git checkout {{ $branch }}
+git pull origin {{ $branch }}
 @endtask
 
 @task('cloneRepository', ['on' => 'remote'])
@@ -54,7 +55,7 @@ cd {{ $releasesDir }};
 mkdir {{ $newReleaseDir }};
 
 # Clone the repo
-git clone --depth 1 git@github.com:{{ $repository }} {{ $newReleaseName }}
+git clone --depth 1 git@github.com:{{ $repository }} --branch {{ $branch }} {{ $newReleaseName }}
 
 # Configure sparse checkout
 cd {{ $newReleaseDir }}
@@ -70,6 +71,11 @@ echo "{{ $newReleaseName }}" > public/release-name.txt
 @endtask
 
 @task('runComposer', ['on' => 'remote'])
+
+# Import the environment config
+cd {{ $newReleaseDir }};
+ln -nfs {{ $baseDir }}/.env .env;
+
 cd {{ $newReleaseDir }};
 {{ logMessage("🚚  Running Composer…") }}
 ln -nfs {{ $baseDir }}/auth.json auth.json;
@@ -87,8 +93,9 @@ yarn
 @task('generateAssets', ['on' => 'remote'])
 {{ logMessage("🌅  Generating assets…") }}
 cd {{ $newReleaseDir }};
-yarn run production -- --progress false
-yarn build-generate-newsletter-prod -- --progress false
+yarn run production
+yarn build-generate-newsletter-prod
+rm -rf node_modules
 @endtask
 
 @task('updateSymlinks', ['on' => 'remote'])
@@ -103,15 +110,15 @@ rm -rf {{ $newReleaseDir }}/public/uploads;
 cd {{ $newReleaseDir }};
 ln -nfs {{ $baseDir }}/persistent/uploads public/uploads;
 
-# Import the environment config
+# Symlink the og images to the public directory
+rm -rf {{ $newReleaseDir }}/public/og-images;
 cd {{ $newReleaseDir }};
-ln -nfs {{ $baseDir }}/.env .env;
+ln -nfs {{ $baseDir }}/persistent/storage/og-images {{ $newReleaseDir }}/public/og-images;
 
 # Symlink the persistent fonts to the public directory
 cd {{ $baseDir }}/persistent/fonts
 git pull origin master
 ln -nfs {{ $baseDir }}/persistent/fonts {{ $newReleaseDir }}/public/fonts;
-
 @endtask
 
 @task('optimizeInstallation', ['on' => 'remote'])
@@ -141,18 +148,18 @@ php artisan config:clear
 php artisan view:clear
 php artisan cache:clear
 php artisan config:cache
-php artisan responsecache:clear
+php artisan octane:reload
 
-sudo service php7.3-fpm restart
+sudo service php8.0-fpm restart
 sudo supervisorctl restart all
 @endtask
 
 @task('cleanOldReleases', ['on' => 'remote'])
 {{ logMessage("🚾  Cleaning up old releases…") }}
-# Delete all but the 5 most recent.
+# Delete all but the 3 most recent.
 cd {{ $releasesDir }}
-ls -dt {{ $releasesDir }}/* | tail -n +6 | xargs -d "\n" sudo chown -R forge .;
-ls -dt {{ $releasesDir }}/* | tail -n +6 | xargs -d "\n" rm -rf;
+ls -dt {{ $releasesDir }}/* | tail -n +4 | xargs -d "\n" sudo chown -R forge .;
+ls -dt {{ $releasesDir }}/* | tail -n +4 | xargs -d "\n" rm -rf;
 @endtask
 
 @task('finishDeploy', ['on' => 'local'])
@@ -162,12 +169,12 @@ ls -dt {{ $releasesDir }}/* | tail -n +6 | xargs -d "\n" rm -rf;
 @task('deployOnlyCode',['on' => 'remote'])
 {{ logMessage("💻  Deploying code changes…") }}
 cd {{ $currentDir }}
-git pull origin master
+git pull origin {{ $branch }}
 php artisan config:clear
 php artisan view:clear
 php artisan cache:clear
 php artisan config:cache
 php artisan responsecache:clear
-sudo supervisorctl restart all
-sudo service php7.3-fpm restart
+php artisan schedule-monitor:sync
+php artisan octane:reload
 @endtask

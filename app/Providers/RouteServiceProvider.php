@@ -6,6 +6,7 @@ use App\Models\Post;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Spatie\ResponseCache\Middlewares\DoNotCacheResponse;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -18,13 +19,30 @@ class RouteServiceProvider extends ServiceProvider
 
     public function map()
     {
-        $this->mapFrontRoutes();
+        Route::mailcoach('mailcoach');
+        Route::mailgunFeedback('mailgun-feedback');
+
+        $this
+            ->mapAuthRoutes()
+            ->mapFrontRoutes();
+    }
+
+    protected function mapAuthRoutes()
+    {
+        Route::middleware('web')->group(base_path('routes/auth.php'));
+
+        return $this;
     }
 
     protected function mapFrontRoutes()
     {
-        Route::middleware(['web', 'cacheResponse'])
-            ->group(base_path('routes/web.php'));
+        Route::get('a-test-page', function () {
+            return 'ok';
+        })->middleware(DoNotCacheResponse::class);
+
+        Route::middleware(['web', 'cacheResponse'])->group(base_path('routes/web.php'));
+
+        return $this;
     }
 
     public function registerRouteModelBindings()
@@ -36,11 +54,15 @@ class RouteServiceProvider extends ServiceProvider
                 abort(404);
             }
 
-            if (auth()->check()) {
+            if (optional(auth()->user())->email === 'freek@spatie.be') {
                 return $post;
             }
 
-            if (!$post->published) {
+            if ($post->preview_secret === request()->get('preview_secret')) {
+                return $post;
+            }
+
+            if (! $post->published) {
                 abort(404);
             }
 

@@ -2,20 +2,19 @@
 
 namespace Freekmurze\GenerateNewsletter;
 
+use App\Models\Link;
 use App\Models\Post;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use NumberFormatter;
 
 class NewsletterGenerator
 {
-    /** @var \Carbon\Carbon */
-    protected $startDate;
+    protected Carbon  $startDate;
 
-    /** @var \Carbon\Carbon */
-    protected $endDate;
+    protected Carbon $endDate;
 
-    /** @var int */
-    protected $editionNumber;
+    protected string $editionNumber;
 
     public function __construct(Carbon $startDate, Carbon $endDate, int $editionNumber)
     {
@@ -23,21 +22,25 @@ class NewsletterGenerator
 
         $this->endDate = $endDate;
 
-        $this->editionNumber = $editionNumber;
+
+
+        $this->editionNumber = $this->ordinal($editionNumber);
     }
 
     public function getHtml()
     {
         $recentPosts = $this->getRecentPosts();
         $recentTweets = $this->getRecentTweets();
+        $communityLinks = $this->getRecentCommunityLinks();
         $oldPosts = $this->getOldPosts();
         $editionNumber = $this->editionNumber;
 
         return view('generate-newsletter::template', compact(
             'recentPosts',
             'recentTweets',
+            'communityLinks',
             'oldPosts',
-            'editionNumber'
+            'editionNumber',
         ))->render();
     }
 
@@ -58,10 +61,21 @@ class NewsletterGenerator
         );
     }
 
+    public function getRecentCommunityLinks(): Collection
+    {
+        return Link::approved()
+            ->whereBetween('publish_date', [
+                $this->startDate->startOfDay(),
+                $this->endDate->endOfDay(),
+            ])
+            ->get()
+            ->reject(fn (Link $link) => Post::where('external_url', $link->url)->exists());
+    }
+
     protected function getOldPosts(): Collection
     {
         return $this->getPosts(
-            $this->endDate->copy()->subYear()->subWeek(2)->startOfDay(),
+            $this->endDate->copy()->subYear()->subWeeks(2)->startOfDay(),
             $this->endDate->subYear()->endOfDay()
         );
     }
@@ -73,10 +87,15 @@ class NewsletterGenerator
         return Post::published()
             ->whereBetween('publish_date', [
                 $startDate,
-                $endDate
+                $endDate,
             ])
             ->orderBy('original_content', 'desc')
             ->get()
             ->$method->hasTag('tweet');
+    }
+
+    private function ordinal(int $number): string
+    {
+        return (new NumberFormatter('en_US', NumberFormatter::ORDINAL))->format($number);
     }
 }

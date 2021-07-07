@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <meta charset="utf-8">
@@ -19,4 +18,10 @@
 <style>{!! file_get_contents(public_path('css/app.css')) !!}</style>
 <link rel="stylesheet" href="https://cloud.typography.com/6194432/6581412/css/fonts.css"/>
 
-<script src="{{ mix('js/app.js') }}" defer></script>
+<script src="{{ mix('js/app.js') }}" defer="defer"></script>
+
+<link href="https://twitter.com/freekmurze" rel="me">
+<link rel="webmention" href="https://webmention.io/freek.dev/webmention" />
+<link rel="pingback" href="https://webmention.io/freek.dev/xmlrpc" />
+<livewire:styles />
+

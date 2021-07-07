@@ -5,6 +5,7 @@ namespace App\Nova;
 use App\Models\Post as PostModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\Markdown;
@@ -40,17 +41,16 @@ class Post extends Resource
                         return '';
                     }
 
-                    return '<a target="murze_preview" href="' . url($this->url) . '">Show</a>';
+                    return '<a target="freekdev_preview" href="' . url($this->published ? $this->url : $this->preview_url) . '">Show</a>';
                 })->asHtml(),
 
                 Markdown::make('Text')
                     ->rules('required'),
 
-                Tags::make('Tags'),
+                Tags::make('Tags')->hideFromIndex(),
 
                 DateTime::make('Publish date')
-                    ->hideFromIndex()
-                    ->sortable()
+                    ->sortable(),
             ]),
 
             new Panel('Meta', [
@@ -60,12 +60,24 @@ class Post extends Resource
                 Boolean::make('Published'),
 
                 Boolean::make('Original content'),
+
+                Boolean::make('Send automated tweet')
+                    ->hideFromIndex()
+                    ->withMeta(['value' => $this->send_automated_tweet ?? true]),
+
+                BelongsTo::make('Submitted by', 'submittedByUser', User::class)
+                    ->hideFromIndex()
+                    ->nullable(),
+
+                Text::make('Author Twitter handle'),
             ]),
         ];
     }
 
     public static function indexQuery(NovaRequest $request, $query)
     {
-        return $query->orderByDesc('publish_date');
+        return $query
+            ->orderBy('published')
+            ->orderByDesc('publish_date');
     }
 }

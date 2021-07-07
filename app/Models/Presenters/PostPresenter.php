@@ -6,35 +6,53 @@ use App\Models\Post;
 use App\Services\CommonMark\CommonMark;
 use Illuminate\Support\Str;
 
+/** @mixin Post */
 trait PostPresenter
 {
     public function getExcerptAttribute(): string
     {
-        $excerpt = $this->getManualExcerpt() ?? $this->getAutomaticExerpt();
+        $excerpt = $this->getManualExcerpt() ?? $this->getAutomaticExcerpt();
 
         $excerpt = str_replace(
             '<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>',
             '<div data-lazy="twitter"></div>',
             $excerpt,
-            );
+        );
 
-        $excerpt = CommonMark::convertToHtml($excerpt);
+        $excerpt = CommonMark::convertToHtml($excerpt, false);
+
+        return trim($excerpt);
+    }
+
+    public function getPlainTextExcerptAttribute(): string
+    {
+        return strip_tags($this->excerpt);
+    }
+
+    public function getNewsletterExcerptAttribute(): string
+    {
+        $excerpt = $this->getAutomaticExcerpt();
+        $excerpt = Str::replaceLast('</p>', '', $excerpt);
+        $excerpt = Str::replaceFirst('<p>', '', $excerpt);
+        $excerpt = Str::before($excerpt, '<blockquote>');
+
+        $excerpt = strip_tags($excerpt);
 
         return trim($excerpt);
     }
 
     protected function getManualExcerpt(): ?string
     {
-        if (!Str::contains($this->text, '<!--more-->')) {
+        if (! Str::contains($this->text, '<!--more-->')) {
             return null;
         }
 
         return trim(Str::before($this->text, '<!--more-->'));
     }
 
-    protected function getAutomaticExerpt(): string
+    protected function getAutomaticExcerpt(): string
     {
-        if (!$this->original_content) {
+        if (! $this->original_content) {
             return $this->formatted_text;
         }
 
@@ -124,6 +142,25 @@ trait PostPresenter
         return '#cbd5e0';
     }
 
+    public function getGradientColorsAttribute(): string
+    {
+        $tagNames = $this->tags->pluck('name');
+
+        if ($tagNames->contains('laravel')) {
+            return 'from-red-400 to-red-700';
+        }
+
+        if ($tagNames->contains('php')) {
+            return 'from-blue-500 to-blue-800';
+        }
+
+        if ($tagNames->contains('javascript')) {
+            return 'from-yellow-400 to-orange-500';
+        }
+
+        return 'from-gray-400 to-gray-700';
+    }
+
     public function getReadingTimeAttribute(): int
     {
         return (int)ceil(str_word_count(strip_tags($this->text)) / 200);
@@ -137,5 +174,12 @@ trait PostPresenter
     public function getExternalUrlHostAttribute(): string
     {
         return parse_url($this->external_url)['host'] ?? '';
+    }
+
+    public function getSeriesTocTitleAttribute(): string
+    {
+        $titleAfterPart = Str::after($this->title, 'part');
+
+        return "Part{$titleAfterPart}";
     }
 }
